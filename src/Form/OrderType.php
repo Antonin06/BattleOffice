@@ -2,30 +2,29 @@
 
 namespace App\Form;
 
-use App\Entity\Product;
+use App\Entity\Order;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ProductType extends AbstractType
+class OrderType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name')
-            // ->add('price')
-            // ->add('special_offer')
-            // ->add('img_path')
-            // ->add('quantity')
-            // ->add('free_item')
-            // ->add('price_eco')
+            ->add('status')
+            ->add('id_api')
+            // ->add('created_at')
+            ->add('is_paid')
+            // ->add('client')
+            // ->add('product')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Product::class,
+            'data_class' => Order::class,
         ]);
     }
 }

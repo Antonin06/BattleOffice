@@ -29,88 +29,89 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class LandingPageController extends AbstractController
 {
-    /**
-     * @Route("/", name="landing_page")
-     * @throws \Exception
-     */
-    public function index(Request $request)
-    {
-        $products  = $this->getDoctrine()
-            ->getRepository(Product::class)
-            ->findAll();
+  /**
+  * @Route("/", name="landing_page")
+  * @throws \Exception
+  */
+  public function index(Request $request)
+  {
+    $products  = $this->getDoctrine()
+    ->getRepository(Product::class)
+    ->findAll();
 
-        // dd($products[0]->getId());
-
-
-        $entityInstance=[
-            'product' => new Product(),
-            'client' => new Client(),
-            'shipping' => new Shipping(),
-            'order'=> new Order(),
-        ];
-
-        $entityInstance["order"]->setCreatedAt(new \DateTime());
-
-        $formBuilder = $this->createFormBuilder($entityInstance, [
-            'csrf_protection' => false,
-            'csrf_field_name' => '_token',
-            'csrf_token_id' => 'order_csrf'
-        ])
-            ->add('client',ClientType::class)
-            ->add('product',ProductType::class)
-            ->add('shipping',ShippingType::class)
-            ->add('order' ,OrderType::class);
-
-        $form=$formBuilder->getForm();
-        $form->handleRequest($request);
-
-        // dd($form);
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $productId = $request->get('order')["cart"]["cart_products"][0];
+    // dd($products[0]->getId());
 
 
+    $entityInstance=[
+      'product' => new Product(),
+      'client' => new Client(),
+      'shipping' => new Shipping(),
+      'order'=> new Order(),
+    ];
 
-            // dd($clientId);
-            $entityManager = $this->getDoctrine()->getManager();
-            // $entityManager->persist($order>getProduct()->getId());
-            $entityManager->persist($entityInstance['client']);
-            $entityManager->persist($entityInstance['shipping']);
+    $entityInstance["order"]->setCreatedAt(new \DateTime());
 
-            $product = $entityManager->find(Product::class, $productId);
-            $entityInstance["order"]->setProduct($product);
-            $entityInstance["order"]->setClient($entityInstance['client']);
-            $entityManager->persist($entityInstance['order']);
+    $formBuilder = $this->createFormBuilder($entityInstance, [
+      'csrf_protection' => false,
+      'csrf_field_name' => '_token',
+      'csrf_token_id' => 'order_csrf'
+    ])
+    ->add('client',ClientType::class)
+    ->add('product',ProductType::class)
+    ->add('shipping',ShippingType::class)
+    ->add('order' ,OrderType::class);
 
-            $entityManager->flush();
+    $form=$formBuilder->getForm();
+    $form->handleRequest($request);
 
-            return $this->redirectToRoute('confirmation');
+    // dd($form);
+    if ($form->isSubmitted() && $form->isValid()) {
 
-        }
+      $productId = $request->get('order')["cart"]["cart_products"][0];
 
+      // dd($clientId);
+      $entityManager = $this->getDoctrine()->getManager();
+      // $entityManager->persist($order>getProduct()->getId());
+      $entityManager->persist($entityInstance['client']);
+      $entityManager->persist($entityInstance['shipping']);
 
+      $entityInstance["client"]->setShipping($entityInstance['shipping']);
+      $entityInstance["shipping"]->setClient($entityInstance['client']);
 
-        return $this->render('landing_page/index_new.html.twig', [
-            'entityInstance'=>[
-                'product' => new Product(),
-                'client' => new Client(),
-                'shipping' => new Shipping(),
-                'order'=> new Order(),
-                ],
-            'products'=>$products,
-            'form' => $form->createView(),
+      $product = $entityManager->find(Product::class, $productId);
+      $entityInstance["order"]->setProduct($product);
+      $entityInstance["order"]->setClient($entityInstance['client']);
+      $entityManager->persist($entityInstance['order']);
 
+      $entityManager->flush();
 
-        ]);
+      return $this->redirectToRoute('confirmation');
 
     }
-    /**
-     * @Route("/confirmation", name="confirmation")
-     */
-    public function confirmation()
-    {
-        return $this->render('landing_page/confirmation.html.twig', [
 
-        ]);
-    }
+
+
+    return $this->render('landing_page/index_new.html.twig', [
+      'entityInstance'=>[
+        'product' => new Product(),
+        'client' => new Client(),
+        'shipping' => new Shipping(),
+        'order'=> new Order(),
+      ],
+      'products'=>$products,
+      'form' => $form->createView(),
+
+
+    ]);
+
+  }
+  /**
+  * @Route("/confirmation", name="confirmation")
+  */
+  public function confirmation()
+  {
+    return $this->render('landing_page/confirmation.html.twig', [
+
+    ]);
+  }
 }

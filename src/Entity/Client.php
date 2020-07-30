@@ -238,6 +238,6 @@ class Client
     }
     public  function __toString()
     {
-        return $this-> getLastName();
+        return $this-> getFirstName();
     }
 }
